@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Добавили Link
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient'; // Убедись, что путь к файлу supabaseClient правильный
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -9,22 +10,21 @@ export default function Register() {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost/finapi/register.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      });
-      const result = await response.json();
 
-      if (result.status === 'success') {
-        alert('Регистрация успешна!');
-        navigate('/login');
-      } else {
-        alert(result.message);
+    // Регистрируем пользователя напрямую через Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: name }
       }
-    } catch (error) {
-      alert('Ошибка соединения с сервером.');
+    });
+
+    if (error) {
+      alert('Ошибка регистрации: ' + error.message);
+    } else {
+      alert('Регистрация успешна!');
+      navigate('/login');
     }
   };
 

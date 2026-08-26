@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Добавили Link
+import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '../supabaseClient'; // Выходим из папки pages в src
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -8,23 +9,28 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch('http://localhost/finapi/login.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const result = await response.json();
 
-      if (result.status === 'success') {
-        localStorage.setItem('user', JSON.stringify(result.user));
-        alert(`Привет, ${result.user.name}!`);
-        window.location.href = '/dashboard'; 
-      } else {
-        alert(result.message);
-      }
-    } catch (error) {
-      alert('Ошибка соединения с сервером.');
+    // Авторизация пользователя через Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert('Ошибка входа: ' + error.message);
+    } else {
+      // Достаем имя из метаданных Supabase (указанное при регистрации)
+      const userName = data.user.user_metadata?.full_name || data.user.email;
+
+      // Сохраняем пользователя в localStorage (для совместимости с вашим остальным кодом)
+      localStorage.setItem('user', JSON.stringify({
+        id: data.user.id,
+        email: data.user.email,
+        name: userName
+      }));
+
+      alert(`Привет, ${userName}!`);
+      navigate('/dashboard');
     }
   };
 
@@ -37,7 +43,6 @@ export default function Login() {
         <button type="submit" className="btn">Войти</button>
       </form>
       
-      {/* Вот этот кусочек мы добавили */}
       <p style={{ marginTop: '1rem', textAlign: 'center' }}>
         Нет аккаунта? <Link to="/register" style={{ color: '#0088FE' }}>Зарегистрироваться</Link>
       </p>
