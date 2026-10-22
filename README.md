@@ -1,3 +1,9 @@
+# Финансовый обозреватель
+Веб-приложение для учёта личного бюджета: доходы, расходы, аналитика.
+
+Стек: PHP (PDO), MySQL, REST API, recharts.
+Дипломный проект. Часть кода написана с помощью ИИ-инструментов под моим руководством.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
