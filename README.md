@@ -4,6 +4,8 @@
 Стек: PHP (PDO), MySQL, REST API, recharts.
 Дипломный проект. Часть кода написана с помощью ИИ-инструментов под моим руководством.
 
+<img width="1920" height="1020" alt="image" src="https://github.com/user-attachments/assets/cfc9b63c-4468-416c-b9a9-17d6c9da4d06" />
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
