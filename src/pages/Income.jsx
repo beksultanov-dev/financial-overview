@@ -7,11 +7,14 @@ export default function Income() {
   const [category, setCategory] = useState('');
   const [date, setDate] = useState('');
   const [desc, setDesc] = useState('');
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user?.id;
 
   // Функция для скачивания свежих данных с сервера
   const loadData = async () => {
+  if (!userId) return;
     try {
-      const response = await fetch('http://localhost/finapi/get_data.php');
+      const response = await fetch(`http://localhost/finapi/get_data.php?user_id=${userId}`);
       const dataFromPhp = await response.json();
       setData(dataFromPhp);
 
@@ -33,6 +36,7 @@ export default function Income() {
     e.preventDefault();
 
     const newOperation = {
+      user_id: userId,
       type: 'income',
       amount: Number(amount),
       date: date,
