@@ -12,10 +12,16 @@ export default function Income() {
 
   // Функция для скачивания свежих данных с сервера
   const loadData = async () => {
-  if (!userId) return;
+    if (!userId) return;
     try {
       const response = await fetch(`http://localhost/finapi/get_data.php?user_id=${userId}`);
       const dataFromPhp = await response.json();
+
+      // Если сервер вернул ошибку (например, база недоступна), не ломаем страницу
+      if (dataFromPhp.error) {
+        console.error('Ошибка сервера:', dataFromPhp.error);
+        return;
+      }
       setData(dataFromPhp);
 
       // Автоматически выбираем первую категорию, если она еще не выбрана
@@ -59,14 +65,35 @@ export default function Income() {
         // Очищаем форму
         setAmount('');
         setDesc('');
-        
+
         // МГНОВЕННО обновляем таблицу, скачивая свежие данные из базы!
-        loadData(); 
+        loadData();
       } else {
         alert('Ошибка сервера: ' + result.message);
       }
     } catch (error) {
       console.error('Ошибка при отправке:', error);
+      alert('Не удалось связаться с сервером PHP.');
+    }
+  };
+
+  // Удаление операции: сервер проверяет, что запись принадлежит этому пользователю
+  const handleDelete = async (id) => {
+    if (!window.confirm('Удалить запись?')) return;
+    try {
+      const response = await fetch('http://localhost/finapi/delete_operation.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, user_id: userId }),
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        loadData();
+      } else {
+        alert('Не удалось удалить запись');
+      }
+    } catch (error) {
+      console.error('Ошибка при удалении:', error);
       alert('Не удалось связаться с сервером PHP.');
     }
   };
@@ -109,6 +136,7 @@ export default function Income() {
               <th>Категория</th>
               <th>Сумма</th>
               <th>Описание</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -120,12 +148,13 @@ export default function Income() {
                 <td>{op.date}</td>
                 <td>{op.category}</td>
                 <td style={{ color: 'green' }}>+{formatMoney(op.amount)}</td>
-                <td>{op.description}</td> 
+                <td>{op.description}</td>
+                <td><button className="btn" onClick={() => handleDelete(op.id)}>Удалить</button></td>
               </tr>
             ))}
             {data.operations.filter(op => op.type === 'income').length === 0 && (
               <tr>
-                <td colSpan="4" style={{ textAlign: 'center', color: '#666' }}>Пока нет добавленных доходов</td>
+                <td colSpan="5" style={{ textAlign: 'center', color: '#666' }}>Пока нет добавленных доходов</td>
               </tr>
             )}
           </tbody>
