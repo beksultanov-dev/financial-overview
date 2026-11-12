@@ -1,25 +1,38 @@
 # Финансовый обозреватель
-Веб-приложение для учёта личного бюджета: доходы, расходы, аналитика.
 
-Стек: PHP (PDO), MySQL, REST API, recharts.
-Дипломный проект. Часть кода написана с помощью ИИ-инструментов под моим руководством.
+Дипломный проект: веб-приложение для учёта личного бюджета. Доходы и расходы по категориям, свои категории, дашборд с балансом и диаграммой, статистика и экспорт отчёта в PDF.
 
 <img width="1888" height="895" alt="image" src="https://github.com/user-attachments/assets/b6dc9e7e-3af4-44ee-93e1-95ee819146c2" />
 
+## Стек
+- Интерфейс: React, Vite, React Router, recharts, jsPDF
+- Вход и регистрация: Supabase Auth
+- Серверная часть: PHP (PDO) и MySQL (папка `backend/`)
 
-# React + Vite
+## Как устроено
+Браузер → React (Vercel) → Supabase Auth (вход, выдаёт идентификатор пользователя) → PHP API → MySQL
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Операции и категории хранятся в MySQL и привязаны к `user_id` из Supabase. Каждый пользователь видит только свои записи.
 
-Currently, two official plugins are available:
+| Файл в `backend/` | Назначение |
+|---|---|
+| `get_data.php` | операции и категории пользователя |
+| `add_operation.php` | добавление операции |
+| `add_category.php` | добавление своей категории |
+| `delete_operation.php` | удаление операции (проверяет владельца) |
+| `schema.sql` | таблицы `operations` и `categories` |
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Ограничения
+- Интерфейс опубликован на Vercel, а PHP и MySQL запускаются только локально (адрес `http://localhost/finapi/` указан в коде). Онлайн-версия позволяет зарегистрироваться и войти, но данные сохраняет только при запущенном локальном сервере.
+- Идентификатор пользователя приходит от клиента, токен Supabase на сервере не проверяется. Следующий шаг: передавать токен и проверять его в PHP.
+- Бесплатный проект Supabase может приостанавливаться при простое.
 
-## React Compiler
+## Запуск локально
+1. `npm install`, затем `npm run dev`.
+2. Запусти Apache и MySQL в XAMPP, скопируй содержимое папки `backend` в `htdocs/finapi`.
+3. Скопируй `db.example.php` как `db.php` (для XAMPP подходят значения по умолчанию).
+4. В phpMyAdmin выполни `schema.sql`.
+5. В `src/supabaseClient.js` укажи URL и ключ своего проекта Supabase.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Об использовании ИИ
+Часть кода написана с помощью ИИ-инструментов под моим руководством. Проверку разделения данных между пользователями (на двух аккаунтах) и отладку обращений к серверу делал я.
